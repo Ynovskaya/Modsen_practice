@@ -1,0 +1,260 @@
+<!--
+    У меня было первое тестовое. И проще всего было закинуть все в html и его закинуть на гид. Спасибо, что дали возможность докинуть сегодня :)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>приложение для тестирования</title>
+  <style>
+    .correct {
+        background-color: green;
+    }    
+    .incorrect {
+        background-color: red;
+    }
+
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f4c9c9;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #8e5f5f;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+  }
+
+  h2 {
+    margin-top: 0;
+  }
+
+  .question {
+    margin-bottom: 10px;
+  }
+
+  .options label {
+    display: block;
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+
+  .options input[type="radio"] {
+    margin-right: 5px;
+  }
+
+  .button {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    color: #080808;
+    background-color: #ff5c61;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .button:hover {
+    background-color: #97ba99;
+  }
+
+  .result {
+    text-align: center;
+  }
+
+  .result p {
+    margin-top: 0;
+    font-size: 18px;
+  }
+
+  .result .score {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="question-block">
+      <h2 id="question" class="question">Вопрос 1: How many planets are in the solar system?</h2>
+      <div id="answers" class="options">
+        <input type="radio" name="answer" value="8" id="answerA">
+        <label for="answerA">8</label><br>
+        <input type="radio" name="answer" value="9" id="answerB">
+        <label for="answerB">9</label><br>
+        <input type="radio" name="answer" value="10" id="answerC">
+        <label for="answerC">10</label><br>
+      </div>
+      <button class="button" onclick="checkAnswer()">Ответить</button>
+      <button class="button" id="next-question-button" onclick="nextQuestion()" style="display: none;">Следующий вопрос</button>
+    </div>
+
+    <div id="result-block" style="display: none;">
+      <div class="result">
+        <p>Количество правильных ответов: <span id="score" class="score">0</span></p>
+        <button class="button" onclick="resetTest()">Начать заново</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+     var questions = [
+      {
+        question: "How many planets are in the solar system?",
+        answers: ["8", "9", "10"],
+        correctAnswer: "8"
+      },
+      {
+        question: "What is the freezing point of water?",
+        answers: ["0", "-5", "-6"],
+        correctAnswer: "0"
+      },
+      {
+        question: "What is the longest river in the world?",
+        answers: ["Nile", "Amazon", "Yangtze"],
+        correctAnswer: "Nile"
+      },
+      {
+        question: "How many chromosomes are in the human genome?",
+        answers: ["42", "44", "46"],
+        correctAnswer: "46"
+      },
+      {
+        question: "Which of these characters are friends with Harry Potter?",
+        answers: ["Ron Weasley", "Draco Malfoy", "Hermione Granger"],
+        correctAnswer: "Ron Weasley"
+      },
+      {
+        question: "What is the capital of Canada?",
+        answers: ["Toronto", "Ottawa", "Vancouver"],
+        correctAnswer: "Ottawa"
+      },
+      {
+        question: "What is the Jewish New Year called?",
+        answers: ["Hanukkah", "Yom Kippur", "Rosh Hashanah"],
+        correctAnswer: "Rosh Hashanah"
+      }
+    ];
+
+    var currentQuestion = 0;
+    var score = 0;
+
+    function displayQuestion() {
+      var questionElement = document.getElementById("question");
+      var answersElement = document.getElementById("answers");
+      questionElement.innerHTML = "Вопрос " + (currentQuestion + 1) + ": " + questions[currentQuestion].question;
+
+      while (answersElement.firstChild) {
+        answersElement.removeChild(answersElement.firstChild);
+      }
+
+      for (var i = 0; i < questions[currentQuestion].answers.length; i++) {
+        var answer = questions[currentQuestion].answers[i];
+
+        var input = document.createElement("input");
+        input.type = "radio";
+        input.name = "answer";
+        input.value = answer;
+        input.id = "answer" + i;
+
+        var label = document.createElement("label");
+        label.htmlFor = "answer" + i;
+        label.innerHTML = answer;
+
+        answersElement.appendChild(input);
+        answersElement.appendChild(label);
+        answersElement.appendChild(document.createElement("br"));
+      }
+    }
+
+    function checkAnswer() {
+      var selectedAnswer = document.querySelector('input[name="answer"]:checked');
+      if (!selectedAnswer) {
+        return; // Если ответ не выбран, выходим из функции
+      }
+
+      if (selectedAnswer.value === questions[currentQuestion].correctAnswer) {
+        selectedAnswer.parentNode.style.color = "green";
+        score++;
+      } else {
+        selectedAnswer.parentNode.style.color = "red";
+      }
+
+      disableAnswerSelection();
+      showNextQuestionButton();
+    }
+
+    function disableAnswerSelection() {
+      var answers = document.querySelectorAll('input[name="answer"]');
+      for (var i = 0; i < answers.length; i++) {
+        answers[i].disabled = true;
+      }
+    }
+
+    function showNextQuestionButton() {
+      var nextQuestionButton = document.getElementById("next-question-button");
+      nextQuestionButton.style.display = "block";
+    }
+
+    function nextQuestion() {
+      var nextQuestionButton = document.getElementById("next-question-button");
+      nextQuestionButton.style.display = "none";
+
+      var selectedAnswer = document.querySelector('input[name="answer"]:checked');
+      if (selectedAnswer) {
+        selectedAnswer.parentNode.style.color = "";
+        selectedAnswer.checked = false;
+      }
+
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+        displayQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      var questionBlock = document.getElementById("question-block");
+      var resultBlock = document.getElementById("result-block");
+      var scoreElement = document.getElementById("score");
+      scoreElement.innerHTML = score;
+
+      questionBlock.style.display = "none";
+      resultBlock.style.display = "block";
+    }
+
+    function resetTest() {
+      var questionBlock = document.getElementById("question-block");
+      var resultBlock = document.getElementById("result-block");
+      var answers = document.querySelectorAll('input[name="answer"]');
+
+      for (var i = 0; i < answers.length; i++) {
+        answers[i].parentNode.style.color = "";
+        answers[i].disabled = false;
+        answers[i].checked = false;
+      }
+
+      currentQuestion = 0;
+      score = 0;
+
+      questionBlock.style.display = "block";
+      resultBlock.style.display = "none";
+
+      displayQuestion();
+    }
+
+    displayQuestion();
+  </script>
+</body>
+</html>
